@@ -1,0 +1,12 @@
+shader = "shaders/MixedExoSkin.surface_shader"
+albedoMap = "models/marine/exosuit/charged_plasma_albedo.dds"
+normalMap = "models/marine/exosuit/charged_plasma_normal.dds"
+specularMap = "models/marine/exosuit/charged_plasma_specular.dds"
+emissiveMap = "models/marine/exosuit/charged_plasma_emissive.dds"
+skinPrimary = [0.22, 0.29, 0.17]
+skinSecondary = [0.09, 0.14, 0.09]
+skinAccent = [0.44, 0.37, 0.16]
+skinCamo = 1
+skinMetal = 0
+plasmaAtlas = 1
+surface = "metal"

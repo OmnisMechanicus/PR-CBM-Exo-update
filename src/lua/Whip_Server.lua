@@ -451,6 +451,23 @@ end
 --
 -- Slap attack
 --
+-- Slaps normally deal direct damage without a physical melee trace. Intercept
+-- the segment to each victim so acquiring a target through a transparent barrier
+-- still drains that barrier rather than damaging the Exo through it.
+local function ApplyShieldedSlapDamage(whip, damage, entity, point, direction, surface)
+    if (gExoBarrierInstanceCount or 0) > 0 then
+        local trace = Shared.TraceRay(whip:GetEyePos(), entity:GetEngagementPoint(),
+            CollisionRep.Damage, PhysicsMask.Bullets, EntityFilterTwo(whip, entity))
+        local shield = trace.entity
+        if shield and shield:isa("ExoShield") and shield:GetIsShieldActive()
+            and GetAreEnemies(whip, shield) then
+            whip:DoDamage(damage, shield, trace.endPoint, direction, "nanoshield")
+            return
+        end
+    end
+    whip:DoDamage(damage, entity, point, direction, surface)
+end
+
 function Whip:SlapTarget(target)
     self:FaceTarget(target)
     -- where we hit
@@ -466,6 +483,7 @@ function Whip:SlapTarget(target)
 	--Log('%s',hitEntitiesDamage)
 	
 	for _, entity in ipairs(hitEntitiesDamage) do
+        if not entity:isa("ExoShield") then
 
 		local targetOrigin = GetTargetOrigin(entity)
 		local mainTarget = entity == target
@@ -473,9 +491,9 @@ function Whip:SlapTarget(target)
 		if self:GetTechId() == kTechId.FortressWhip then
 
 			if mainTarget then
-				self:DoDamage(kWhipSlapDamage, entity, hitPosition, GetNormalizedVector(entity:GetOrigin() - self:GetOrigin()), "none")
+				ApplyShieldedSlapDamage(self, kWhipSlapDamage, entity, hitPosition, GetNormalizedVector(entity:GetOrigin() - self:GetOrigin()), "none")
 			else
-				self:DoDamage(kWhipSlapAoeDamage, entity, targetOrigin, GetNormalizedVector(entity:GetOrigin() - self:GetOrigin()), "none")
+				ApplyShieldedSlapDamage(self, kWhipSlapAoeDamage, entity, targetOrigin, GetNormalizedVector(entity:GetOrigin() - self:GetOrigin()), "none")
 			end			
 
 			-- Whippy Passives
@@ -498,9 +516,10 @@ function Whip:SlapTarget(target)
 		else
 			
 			if mainTarget then
-				self:DoDamage(kWhipSlapDamage, entity, hitPosition, GetNormalizedVector(entity:GetOrigin() - self:GetOrigin()), "none")
+				ApplyShieldedSlapDamage(self, kWhipSlapDamage, entity, hitPosition, GetNormalizedVector(entity:GetOrigin() - self:GetOrigin()), "none")
 			end	
 		end
+        end
 	end
 	
     self:TriggerEffects("whip_attack")

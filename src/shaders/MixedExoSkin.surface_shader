@@ -1,0 +1,58 @@
+<shader>
+<inputs>
+    <input name="albedoMap" type="texture" address="wrap"/>
+    <input name="normalMap" type="texture" address="wrap"/>
+    <input name="specularMap" type="texture" address="wrap"/>
+    <input name="emissiveMap" type="texture" address="wrap" srgb="true"/>
+    <input name="skinPrimary" type="float3">(0.2, 0.25, 0.2)</input>
+    <input name="skinSecondary" type="float3">(0.1, 0.12, 0.1)</input>
+    <input name="skinAccent" type="float3">(0.5, 0.4, 0.1)</input>
+    <input name="skinCamo" type="float">0</input>
+    <input name="plasmaAtlas" type="float">0</input>
+    <input name="skinMetal" type="float">0</input>
+    <input name="hiddenAmount" type="float">0</input>
+    <input name="highlight" type="float">0</input>
+    <input name="outline" type="float">0</input>
+</inputs>
+<params><param name="alphaTest">true</param></params>
+<code><![CDATA[
+// Keep the original UVs, surface detail and luminous plasma tiles. Adapt only
+// painted armor: a 4x2 atlas for plasma, olive armor texels for native claws.
+void MaterialShader(in Material_Input input, inout Material material)
+{
+    float2 uv = float2(input.texCoord.x - floor(input.texCoord.x), input.texCoord.y);
+    float3 base = tex2D(albedoMap, uv).rgb;
+    float4 spec = tex2D(specularMap, uv);
+    float paint = saturate((base.g - base.r * 1.03) * 35)
+        * saturate((base.g - base.b * 1.03) * 35);
+    float detail = saturate(dot(base, float3(0.299, 0.587, 0.114)) * 6);
+    float3 color = skinPrimary;
+    float pattern = sin(uv.x * 91 + sin(uv.y * 47) * 3)
+        + sin(uv.y * 83 + sin(uv.x * 33) * 2);
+    float camo = saturate(pattern * 3 + 0.3) * skinCamo;
+    color = lerp(color, skinSecondary, camo);
+    if (plasmaAtlas > 0.5)
+    {
+        float col = floor(uv.x * 4);
+        float row = floor(uv.y * 2);
+        float tile = col + row * 4;
+        paint = 0;
+        if (tile < 1 || (tile > 3.5 && tile < 4.5)) { paint = 1; }
+        if ((tile > 0.5 && tile < 1.5) || tile > 6.5)
+        {
+            paint = 1; color = lerp(skinSecondary, skinPrimary, camo);
+        }
+        if (tile > 4.5 && tile < 5.5) { paint = 1; color = skinAccent; }
+        detail = saturate(dot(base, float3(0.299, 0.587, 0.114)) * 2.8);
+    }
+    material.albedo = lerp(base, color * detail, paint);
+    material.tsNormal = tex2D(normalMap, uv).xyz * 2 - 1;
+    material.specular = lerp(spec.rgb, float3(0.65, 0.65, 0.65), paint * skinMetal);
+    material.gloss = lerp(spec.a, 0.85, paint * skinMetal);
+    material.emissive = tex2D(emissiveMap, uv).rgb;
+    material.opacity = 1 - hiddenAmount;
+    material.id = highlight;
+    material.outline = outline;
+}
+]]></code>
+</shader>

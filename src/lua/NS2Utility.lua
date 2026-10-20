@@ -1400,6 +1400,15 @@ function GetNearest(origin, className, teamNumber, filterFunc)
 end
 
 function GetCanAttackEntity(seeingEntity, targetEntity)
+    -- The transparent Exo barrier blocks attacks, not a Whip's target acquisition.
+    -- Keep normal FOV, cloak, wall and other obstacle checks in GetCanSeeEntity.
+    if seeingEntity and seeingEntity:isa("Whip") and (gExoBarrierInstanceCount or 0) > 0 then
+        local original = EntityFilterTwoAndIsa(seeingEntity, targetEntity, "Weapon")
+        local filter = function(candidate)
+            return original(candidate) or (candidate and candidate:isa("ExoShield"))
+        end
+        return GetCanSeeEntity(seeingEntity, targetEntity, true, filter)
+    end
     return GetCanSeeEntity(seeingEntity, targetEntity, true)
 end
 

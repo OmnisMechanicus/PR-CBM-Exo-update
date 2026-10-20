@@ -1,0 +1,12 @@
+shader = "shaders/MixedExoSkin.surface_shader"
+albedoMap = "models/marine/exosuit/claw_view.dds"
+normalMap = "models/marine/exosuit/claw_view_normal.dds"
+specularMap = "models/marine/exosuit/claw_view_spec.dds"
+emissiveMap = "materials/dev/black.dds"
+skinPrimary = [0.54, 0.40, 0.20]
+skinSecondary = [0.31, 0.24, 0.15]
+skinAccent = [0.74, 0.58, 0.28]
+skinCamo = 1
+skinMetal = 0
+plasmaAtlas = 0
+surface = "metal"

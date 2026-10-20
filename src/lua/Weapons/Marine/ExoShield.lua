@@ -8,7 +8,8 @@ ExoShield.kModelName = PrecacheAsset("models/marine/exosuit/exo_barrier.model")
 ExoShield.kWidth = 1.65
 ExoShield.kHeight = 2.75
 ExoShield.kDepth = 0.12
-ExoShield.kDistance = 1.15
+-- Shared by barrier rendering, physics, contacts and projectile clearance.
+ExoShield.kDistance = 1.65
 ExoShield.kRadius = 0.825
 ExoShield.kCurveDepth = .20
 ExoShield.kRightModelName = PrecacheAsset("models/marine/exosuit/exo_barrier_right.model")
